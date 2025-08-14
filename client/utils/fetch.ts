@@ -1,5 +1,11 @@
 import type { EnvExam, ExamEnvironmentExamModeration } from "@prisma/client";
-import type { Attempt, ClientSync, SessionUser, User } from "../types";
+import type {
+  Attempt,
+  ClientSync,
+  MaintenanceMode,
+  SessionUser,
+  User,
+} from "../types";
 import { deserializeToPrisma, serializeFromPrisma } from "./serde";
 
 async function authorizedFetch(
@@ -77,6 +83,44 @@ export async function getState(): Promise<ClientSync> {
   const res = await authorizedFetch("/api/state");
   const json = await res.json();
   const deserialized = deserializeToPrisma<ClientSync>(json);
+  return deserialized;
+}
+
+export async function getStateMaintenance(): Promise<MaintenanceMode> {
+  if (import.meta.env.VITE_MOCK_DATA === "true") {
+    await delayForTesting(300);
+
+    const maintenanceMode: MaintenanceMode = {
+      enabled: false,
+    };
+
+    return maintenanceMode;
+  }
+
+  const res = await authorizedFetch("/api/state/maintenance");
+  const json = await res.json();
+  const deserialized = deserializeToPrisma<MaintenanceMode>(json);
+  return deserialized;
+}
+
+export async function postStateMaintenance(
+  maintenanceMode: MaintenanceMode
+): Promise<MaintenanceMode> {
+  if (import.meta.env.VITE_MOCK_DATA === "true") {
+    await delayForTesting(300);
+
+    return maintenanceMode;
+  }
+
+  const res = await authorizedFetch("/api/state/maintenance", {
+    method: "POST",
+    body: JSON.stringify(maintenanceMode),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  const json = await res.json();
+  const deserialized = deserializeToPrisma<MaintenanceMode>(json);
   return deserialized;
 }
 

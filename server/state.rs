@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, RwLock};
 
 use axum::extract::FromRef;
 use axum_extra::extract::cookie::Key;
@@ -8,6 +8,7 @@ use tracing::error;
 use crate::{
     config::EnvVars,
     database::{Database, prisma},
+    routes::state::MaintenanceMode,
 };
 
 #[derive(Clone)]
@@ -16,6 +17,7 @@ pub struct ServerState {
     pub client_sync: Arc<Mutex<ClientSync>>,
     pub key: Key,
     pub env_vars: EnvVars,
+    pub maintenance_mode: Arc<RwLock<MaintenanceMode>>,
 }
 
 impl FromRef<ServerState> for Key {

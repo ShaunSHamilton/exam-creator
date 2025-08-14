@@ -27,6 +27,10 @@ export interface ClientSync {
   exams: EnvExam[];
 }
 
+export interface MaintenanceMode {
+  enabled: boolean;
+}
+
 type AttemptQuestion = EnvMultipleChoiceQuestion & {
   selected: EnvMultipleChoiceQuestionAttempt["answers"];
   submissionTime: EnvMultipleChoiceQuestionAttempt["submissionTimeInMS"];

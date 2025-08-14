@@ -14,6 +14,7 @@ use http::header::X_CONTENT_TYPE_OPTIONS;
 use mongodb::options::ClientOptions;
 use oauth2::{AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl, basic::BasicClient};
 use reqwest::Method;
+use std::sync::RwLock;
 use std::sync::{Arc, Mutex};
 use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::timeout::TimeoutLayer;
@@ -26,6 +27,7 @@ use tower_sessions::{Expiry, MemoryStore, SessionManagerLayer};
 use tracing::info;
 
 use crate::errors::Error;
+use crate::routes::state::MaintenanceMode;
 use crate::{
     database, extractor, routes,
     state::{self, ClientSync, ServerState},
@@ -68,11 +70,14 @@ pub async fn app(env_vars: EnvVars) -> Result<Router, Error> {
         exams: Vec::new(),
     }));
 
+    let maintenance_mode = Arc::new(RwLock::new(MaintenanceMode { enabled: false }));
+
     let server_state = ServerState {
         database,
         client_sync,
         key: Key::from(env_vars.cookie_key.as_bytes()),
         env_vars: env_vars.clone(),
+        maintenance_mode,
     };
 
     tokio::spawn(state::cleanup_online_users(
@@ -136,8 +141,16 @@ pub async fn app(env_vars: EnvVars) -> Result<Router, Error> {
         .route("/api/users", get(routes::users::get_users))
         .route("/api/users/session", get(routes::users::get_session_user))
         .route(
+            "/api/state/maintenance",
+            get(routes::state::get_maintenance),
+        )
+        .route(
+            "/api/state/maintenance",
+            post(routes::state::post_maintenance),
+        )
+        .route(
             "/api/state/exams/{exam_id}",
-            put(routes::discard_exam_state_by_id),
+            put(routes::state::discard_exam_state_by_id),
         )
         .route(
             "/auth/login/github",
