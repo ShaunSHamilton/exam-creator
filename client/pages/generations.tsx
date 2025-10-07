@@ -41,7 +41,6 @@ import { ProtectedRoute } from "../components/protected-route";
 import { UsersWebSocketContext } from "../contexts/users-websocket";
 import { AuthContext } from "../contexts/auth";
 import { landingRoute } from "./landing";
-import type { ExamCreatorExam } from "@prisma/client";
 
 interface GenerationProgress {
   examId: string;
@@ -293,8 +292,8 @@ export function Generations() {
                     Deselect All
                   </Button>
                   <Text color="gray.400" fontSize="sm">
-                    {selectedExams.size} exam{selectedExams.size !== 1 ? "s" : ""}{" "}
-                    selected
+                    {selectedExams.size} exam
+                    {selectedExams.size !== 1 ? "s" : ""} selected
                   </Text>
                 </HStack>
 
@@ -358,8 +357,9 @@ export function Generations() {
                     Total Generations: {totalGenerations}
                   </Text>
                   <Text color="gray.400" fontSize="sm">
-                    {selectedExams.size} exam{selectedExams.size !== 1 ? "s" : ""}{" "}
-                    × {generationCount} generation
+                    {selectedExams.size} exam
+                    {selectedExams.size !== 1 ? "s" : ""} × {generationCount}{" "}
+                    generation
                     {generationCount !== 1 ? "s" : ""}
                   </Text>
                 </VStack>
@@ -428,9 +428,7 @@ export function Generations() {
                       <VStack align="stretch" spacing={2}>
                         <Progress
                           value={(progress.completed / progress.total) * 100}
-                          colorScheme={
-                            progress.failed > 0 ? "yellow" : "teal"
-                          }
+                          colorScheme={progress.failed > 0 ? "yellow" : "teal"}
                           size="sm"
                           borderRadius="md"
                         />
