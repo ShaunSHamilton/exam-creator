@@ -40,6 +40,9 @@ sample.env       Environment variable template
 
 ## Development Commands
 
+**Docker (MongoDB):**
+- use `docker-compose` directly
+
 **Frontend:**
 - `bun install` or `npm install` - Install dependencies
 - `bun run dev` - Start Vite dev server (port 5173)
@@ -56,10 +59,11 @@ sample.env       Environment variable template
 - `npx prisma generate` - Generate client (auto-run in Docker)
 
 **Local Dev Workflow:**
-1. Start MongoDB (local or Atlas)
-2. Set environment variables (see sample.env)
-3. Terminal A: `cargo run` (server)
-4. Terminal B: `bun run dev` (frontend)
+1. Start MongoDB: `docker compose up -d` (or use MongoDB Atlas)
+2. Set environment variables: `cp sample.env .env` and configure
+3. Install dependencies: `bun install`
+4. Terminal A: `cargo run` (server on port 8080)
+5. Terminal B: `bun run dev` (frontend on port 5173)
 
 ## Environment Variables
 
