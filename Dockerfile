@@ -28,11 +28,12 @@ WORKDIR /app
 
 COPY server/ server/
 COPY prisma/ prisma/
+COPY prisma-types/ prisma-types/
 COPY Cargo.toml Cargo.lock ./
 # Copy frontend build to the 'dist' directory for the server to use
 COPY --from=frontend_builder /app/dist /app/dist
 
-# Build application
+# Build application (seeder excluded via Cargo.toml workspace config)
 RUN cargo build --release
 
 FROM gcr.io/distroless/cc-debian12 AS runtime
