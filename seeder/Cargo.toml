@@ -1,0 +1,20 @@
+[package]
+name = "seeder"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[[bin]]
+path = "main.rs"
+name = "seeder"
+
+[dependencies]
+bson = { version = "3", features = ["chrono-0_4", "serde_with-3", "serde"] }
+dotenvy = "0.15"
+futures-util = "0.3"
+mongodb = { version = "3.3", features = ["bson-3"] }
+prisma-types = { path = "../prisma-types" }
+proptest = "1"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Seeder Binary**: New Rust binary using proptest for database seeding
+  - Created `seeder` workspace member
+  - Seeds 3 of each type: exams, users, generated exams, attempts, challenges
+  - Implemented proptest strategies for all domain types
+  - **Referential Integrity**: Automatically maintains foreign key relationships
+    - Queries existing IDs from database before seeding dependent types
+    - Seeds in correct order to satisfy dependencies
+  - Simple usage: `cargo run --package seeder`
+  - Support for staging (default) and production via `MONGODB_ENV` variable
+  - Documentation in `seeder/README.md`
+
 ### Changed
 
 - **Architecture**: Extracted Prisma type definitions into separate `prisma-types` library crate
@@ -11,7 +24,7 @@
   - Introduced `AuthUser` newtype wrapper for authentication extractor to comply with orphan rules
   - Created `ExamCreatorUserExt` trait for server-specific user methods
   - Updated all route handlers to use `AuthUser` instead of direct `ExamCreatorUser`
-  - Converted project to Cargo workspace with `server` and `prisma-types` members
+  - Converted project to Cargo workspace with `server`, `prisma-types`, and `seeder` members
   - Added `PartialEq` derive to Prisma types for comparison operations
 
 ### Technical Details
@@ -20,6 +33,10 @@
 - Server-specific trait implementations remain in the server crate to avoid orphan rule violations
 - Error handling updated to support boxed errors from library helper methods
 - Field name normalization: `r#type` → `_type` for consistency with generated types
+- Seeder uses proptest's strategy pattern for deterministic, reproducible data generation
+- All generated data follows Prisma schema constraints and uses realistic value ranges
+- Foreign key relationships are maintained by querying existing IDs and using them in strategies
+- Seeding order is automatic: Exams/Users → Generated Exams → Attempts/Challenges
 
 ## [2.0.5] - 2025-10-06
 

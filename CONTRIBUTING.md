@@ -36,6 +36,17 @@ bun run build
 bun run develop:server
 ```
 
+### Database Seeding
+
+The project includes a seeder binary that generates test data with proper relationships:
+
+```bash
+# Seeds 3 of each type (exams, users, generated exams, attempts, challenges)
+cargo run --package seeder
+```
+
+See [seeder/README.md](seeder/README.md) for more details.
+
 ### Manual Testing Tips
 
 Set the database URIs in the `.env` file as:

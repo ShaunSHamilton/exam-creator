@@ -26,7 +26,11 @@ server/          Rust Axum backend
   ├── database/  DB helpers, Prisma bridging
   ├── state.rs   Shared in-memory state (ClientSync)
   └── errors.rs  Unified error handling
+seeder/          Proptest-based database seeder
+  ├── main.rs    CLI and seeding logic
+  └── strategies.rs  Proptest strategies for domain types
 prisma/          Schema & JS client generation
+prisma-types/    Rust types generated from Prisma schemas
 public/          Static assets
 index.html       Frontend entry
 Dockerfile       Multi-stage build (bun + cargo chef + distroless)
@@ -58,12 +62,16 @@ sample.env       Environment variable template
 **Prisma:**
 - `npx prisma generate` - Generate client (auto-run in Docker)
 
+**Seeder:**
+- `cargo run --package seeder` - Seed database with 3 of each type
+
 **Local Dev Workflow:**
 1. Start MongoDB: `docker compose up -d` (or use MongoDB Atlas)
 2. Set environment variables: `cp sample.env .env` and configure
 3. Install dependencies: `bun install`
-4. Terminal A: `cargo run` (server on port 8080)
-5. Terminal B: `bun run dev` (frontend on port 5173)
+4. (Optional) Seed database: `cargo run --package seeder`
+5. Terminal A: `cargo run` (server on port 8080)
+6. Terminal B: `bun run dev` (frontend on port 5173)
 
 ## Environment Variables
 
@@ -195,9 +203,10 @@ sample.env       Environment variable template
 2. Add/update Rust route handler in `server/routes/`, register in `app.rs`
 3. Extend frontend types (`client/types/`) and queries (`client/utils/fetch.ts`)
 4. Implement React components
-5. Run `cargo clippy`, `cargo fmt`, and `tsc` to verify
-6. Update `sample.env` if new env vars added
-7. Update this file and `CHANGELOG.md`
+5. Update seeder strategies in `seeder/strategies.rs` if new types added
+6. Run `cargo clippy`, `cargo fmt`, and `tsc` to verify
+7. Update `sample.env` if new env vars added
+8. Update this file and `CHANGELOG.md`
 
 ## Open Items
 
