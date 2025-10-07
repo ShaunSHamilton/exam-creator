@@ -8,7 +8,6 @@ use tokio::sync::broadcast;
 use tracing::info;
 
 use crate::{
-    database::prisma,
     state::{ServerState, SocketEvents, remove_user, set_user_activity},
 };
 

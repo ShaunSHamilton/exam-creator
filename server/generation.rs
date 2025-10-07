@@ -8,7 +8,7 @@ use crate::database::prisma::{
     ExamEnvironmentAnswer, ExamEnvironmentConfig, ExamEnvironmentGeneratedExam,
     ExamEnvironmentGeneratedMultipleChoiceQuestion, ExamEnvironmentGeneratedQuestionSet,
     ExamEnvironmentMultipleChoiceQuestion, ExamEnvironmentQuestionSet,
-    ExamEnvironmentQuestionSetConfig, ExamEnvironmentTagConfig,
+    ExamEnvironmentQuestionSetConfig,
 };
 use crate::errors::Error;
 
@@ -105,6 +105,9 @@ pub fn generate_exam(exam: ExamInput) -> Result<ExamEnvironmentGeneratedExam, Er
     // Main allocation loop
     'question_sets_config_loop: for qsc_with_qs in question_sets_config_with_questions.iter_mut() {
         'sorted_tag_config_loop: for tag_config in sorted_tag_config.iter_mut() {
+            // Collect questions to remove (question_set_id, question_id)
+            let mut questions_to_remove: Vec<(ObjectId, ObjectId)> = Vec::new();
+            
             for question_set in shuffled_question_sets
                 .iter_mut()
                 .filter(|sqs| sqs._type == qsc_with_qs.config._type)
@@ -121,6 +124,11 @@ pub fn generate_exam(exam: ExamInput) -> Result<ExamEnvironmentGeneratedExam, Er
                 if is_question_set_config_fulfilled(qsc_with_qs) {
                     continue 'question_sets_config_loop;
                 }
+
+                // Store question_set id and metadata before mutable borrow
+                let question_set_id = question_set.id.clone();
+                let question_set_type = question_set._type.clone();
+                let question_set_context = question_set.context.clone();
 
                 // Find question with at least all tags in the set.
                 let questions: Vec<&mut ExamEnvironmentMultipleChoiceQuestion> = question_set
@@ -148,7 +156,7 @@ pub fn generate_exam(exam: ExamInput) -> Result<ExamEnvironmentGeneratedExam, Er
                         let qscqs = qsc_with_qs
                             .question_sets
                             .iter_mut()
-                            .find(|qs| qs.id == question_set.id);
+                            .find(|qs| qs.id == question_set_id);
 
                         let question_with_correct_number_of_answers =
                             get_question_with_random_answers(question, &qsc_with_qs.config)?;
@@ -168,22 +176,28 @@ pub fn generate_exam(exam: ExamInput) -> Result<ExamEnvironmentGeneratedExam, Er
                             {
                                 break;
                             }
-                            let mut new_question_set = question_set.clone();
-                            new_question_set.questions =
-                                vec![question_with_correct_number_of_answers];
+                            // Create new question set from stored metadata
+                            let new_question_set = ExamEnvironmentQuestionSet {
+                                id: question_set_id.clone(),
+                                _type: question_set_type.clone(),
+                                context: question_set_context.clone(),
+                                questions: vec![question_with_correct_number_of_answers],
+                            };
                             qsc_with_qs.question_sets.push(new_question_set);
                         }
 
-                        // Remove question from shuffled_question_sets
-                        if let Some(qs) = shuffled_question_sets
-                            .iter_mut()
-                            .find(|qs| qs.id == question_set.id)
-                        {
-                            qs.questions.retain(|q| q.id != question.id);
-                        }
+                        // Mark question for removal
+                        questions_to_remove.push((question_set_id.clone(), question.id.clone()));
 
                         tag_config.number_of_questions -= 1;
                     }
+                }
+            }
+            
+            // Remove marked questions after iteration
+            for (qs_id, q_id) in questions_to_remove {
+                if let Some(qs) = shuffled_question_sets.iter_mut().find(|qs| qs.id == qs_id) {
+                    qs.questions.retain(|q| q.id != q_id);
                 }
             }
         }
@@ -228,6 +242,7 @@ pub fn generate_exam(exam: ExamInput) -> Result<ExamEnvironmentGeneratedExam, Er
                         }
                         false
                     })
+                    .cloned()
                     .ok_or_else(|| {
                         Error::Generation(format!(
                             "Invalid Exam Configuration for {}. Not enough questions for question type {:?}.",

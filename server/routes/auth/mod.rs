@@ -4,7 +4,7 @@ use http::StatusCode;
 use mongodb::bson::doc;
 use tracing::instrument;
 
-use crate::{database::prisma, errors::Error, state::ServerState};
+use crate::{errors::Error, state::ServerState};
 
 pub mod github;
 
