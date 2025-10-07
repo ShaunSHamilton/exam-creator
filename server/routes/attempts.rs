@@ -22,7 +22,7 @@ use crate::{
 ///       Could be smarter with fetching exams and attempts as needed
 #[instrument(skip_all, err(Debug))]
 pub async fn get_attempts(
-    exam_creator_user: prisma::ExamCreatorUser,
+    exam_creator_user: crate::extractor::AuthUser,
     State(server_state): State<ServerState>,
 ) -> Result<Json<Vec<config::Attempt>>, Error> {
     let database = database_environment(&server_state, &exam_creator_user);
@@ -55,7 +55,7 @@ pub async fn get_attempts(
 
 #[instrument(skip_all, err(Debug))]
 pub async fn get_attempt_by_id(
-    exam_creator_user: prisma::ExamCreatorUser,
+    exam_creator_user: crate::extractor::AuthUser,
     State(server_state): State<ServerState>,
     Path(attempt_id): Path<ObjectId>,
 ) -> Result<Json<config::Attempt>, Error> {
@@ -92,7 +92,7 @@ pub struct PatchModerationStatusByAttemptIdBody {
 
 #[instrument(skip_all, err(Debug))]
 pub async fn patch_moderation_status_by_attempt_id(
-    exam_creator_user: prisma::ExamCreatorUser,
+    exam_creator_user: crate::extractor::AuthUser,
     State(server_state): State<ServerState>,
     Path(attempt_id): Path<mongodb::bson::oid::ObjectId>,
     Json(body): Json<PatchModerationStatusByAttemptIdBody>,

@@ -1954,6 +1954,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "prisma-types"
+version = "0.1.0"
+dependencies = [
+ "bson 3.0.0",
+ "mongodb",
+ "prisma-rust-schema",
+ "serde",
+]
+
+[[package]]
 name = "prisma-value"
 version = "0.1.0"
 source = "git+https://github.com/prisma/prisma-engines?tag=6.16.2#1c57fdcd7e44b29b9313256c76699e91c3ac3c43"
@@ -2591,7 +2601,8 @@ dependencies = [
  "mongodb",
  "oauth2",
  "once_cell",
- "prisma-rust-schema",
+ "prisma-types",
+ "rand 0.8.5",
  "reqwest",
  "serde",
  "serde_json",

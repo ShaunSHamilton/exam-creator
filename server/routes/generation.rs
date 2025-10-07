@@ -1,4 +1,7 @@
-use axum::{Json, extract::{Path, State}};
+use axum::{
+    Json,
+    extract::{Path, State},
+};
 use http::StatusCode;
 use mongodb::bson::doc;
 use mongodb::bson::oid::ObjectId;
@@ -14,7 +17,7 @@ use crate::{
 /// Generate an exam based on the exam configuration
 #[instrument(skip_all, err(Debug))]
 pub async fn post_generate_exam(
-    auth_user: prisma::ExamCreatorUser,
+    auth_user: crate::extractor::AuthUser,
     State(state): State<ServerState>,
     Path(exam_id): Path<ObjectId>,
 ) -> Result<Json<prisma::ExamEnvironmentGeneratedExam>, Error> {
@@ -43,10 +46,7 @@ pub async fn post_generate_exam(
     let generated_exam = generation::generate_exam(exam_input)?;
 
     // Store the generated exam in the database
-    database
-        .generated_exam
-        .insert_one(&generated_exam)
-        .await?;
+    database.generated_exam.insert_one(&generated_exam).await?;
 
     info!("Successfully generated exam: {}", generated_exam.id);
 

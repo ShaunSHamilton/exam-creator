@@ -7,7 +7,7 @@ use tower_sessions::Session;
 use tracing::instrument;
 
 use crate::{
-    database::prisma,
+    database::{ExamCreatorUserExt, prisma},
     errors::Error,
     state::{ServerState, SessionUser, User},
 };
@@ -15,7 +15,7 @@ use crate::{
 /// Get all users online (in state)
 #[instrument(skip_all, err(Debug))]
 pub async fn get_users(
-    _: prisma::ExamCreatorUser,
+    _: crate::extractor::AuthUser,
     State(state): State<ServerState>,
 ) -> Result<Json<Vec<User>>, Error> {
     let users = &state.client_sync.lock().unwrap().users;
@@ -26,7 +26,7 @@ pub async fn get_users(
 /// Get current session user
 #[instrument(skip_all, err(Debug))]
 pub async fn get_session_user(
-    exam_creator_user: prisma::ExamCreatorUser,
+    exam_creator_user: crate::extractor::AuthUser,
     session: Session,
     jar: PrivateCookieJar,
     State(server_state): State<ServerState>,
@@ -69,7 +69,7 @@ pub async fn get_session_user(
 }
 
 pub async fn put_user_settings(
-    exam_creator_user: prisma::ExamCreatorUser,
+    exam_creator_user: crate::extractor::AuthUser,
     State(server_state): State<ServerState>,
     Json(new_settings): Json<prisma::ExamCreatorUserSettings>,
 ) -> Result<Json<prisma::ExamCreatorUserSettings>, Error> {

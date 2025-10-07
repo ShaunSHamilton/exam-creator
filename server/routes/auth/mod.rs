@@ -11,7 +11,7 @@ pub mod github;
 /// Logs the user out by deleting the db session(s), and unsetting the sid
 #[instrument(skip_all, err(Debug))]
 pub async fn delete_logout(
-    user: prisma::ExamCreatorUser,
+    user: crate::extractor::AuthUser,
     jar: PrivateCookieJar,
     State(server_state): State<ServerState>,
 ) -> Result<PrivateCookieJar, Error> {

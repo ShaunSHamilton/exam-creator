@@ -22,7 +22,7 @@ pub mod websocket;
 
 #[instrument(skip_all, err(Debug))]
 pub async fn discard_exam_state_by_id(
-    _: prisma::ExamCreatorUser,
+    _: crate::extractor::AuthUser,
     State(state): State<ServerState>,
     Path(exam_id): Path<ObjectId>,
 ) -> Result<Json<prisma::ExamCreatorExam>, Error> {

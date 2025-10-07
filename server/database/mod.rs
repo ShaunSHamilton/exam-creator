@@ -17,8 +17,13 @@ pub struct Database {
     pub exam_environment_exam_moderation: Collection<prisma::ExamEnvironmentExamModeration>,
 }
 
-impl prisma::ExamCreatorUser {
-    pub fn to_session(&self, users: &Vec<User>) -> User {
+/// Extension trait for ExamCreatorUser to add server-specific methods
+pub trait ExamCreatorUserExt {
+    fn to_session(&self, users: &Vec<User>) -> User;
+}
+
+impl ExamCreatorUserExt for prisma::ExamCreatorUser {
+    fn to_session(&self, users: &Vec<User>) -> User {
         if let Some(user) = users.iter().find(|u| u.email == self.email) {
             user.to_owned()
         } else {

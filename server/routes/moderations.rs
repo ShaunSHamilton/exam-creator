@@ -20,7 +20,7 @@ pub struct GetModerationsQuery {
 
 #[instrument(skip_all, err(Debug))]
 pub async fn get_moderations(
-    exam_creator_user: prisma::ExamCreatorUser,
+    exam_creator_user: crate::extractor::AuthUser,
     State(server_state): State<ServerState>,
     Query(params): Query<GetModerationsQuery>,
 ) -> Result<Json<Vec<prisma::ExamEnvironmentExamModeration>>, Error> {

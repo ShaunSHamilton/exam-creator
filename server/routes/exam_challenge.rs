@@ -13,7 +13,7 @@ use crate::{database::prisma, errors::Error, state::ServerState};
 /// Get all exam-challenge mappings for the given exam id.
 #[instrument(skip_all, err(Debug))]
 pub async fn get_exam_challenges(
-    _: prisma::ExamCreatorUser,
+    _: crate::extractor::AuthUser,
     State(state): State<ServerState>,
     Path(exam_id): Path<ObjectId>,
 ) -> Result<Json<Vec<prisma::ExamEnvironmentChallenge>>, Error> {
@@ -46,7 +46,7 @@ pub struct PutExamChallengeBody {
 /// TODO: Use `x_many` queries, and fewer ops
 #[instrument(skip_all, err(Debug))]
 pub async fn put_exam_challenges(
-    _: prisma::ExamCreatorUser,
+    _: crate::extractor::AuthUser,
     State(state): State<ServerState>,
     Path(exam_id): Path<ObjectId>,
     Json(exam_environment_challenges): Json<Vec<PutExamChallengeBody>>,

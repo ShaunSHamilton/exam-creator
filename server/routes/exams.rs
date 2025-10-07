@@ -24,7 +24,7 @@ pub struct GetExam {
 /// The `questionSets` field is removed as not needed, but added in the typing for serialization
 #[instrument(skip_all, err(Debug))]
 pub async fn get_exams(
-    _: prisma::ExamCreatorUser,
+    _: crate::extractor::AuthUser,
     State(state): State<ServerState>,
 ) -> Result<Json<Vec<GetExam>>, Error> {
     let mut exam_creator_exams_prod = state
@@ -38,7 +38,7 @@ pub async fn get_exams(
     let mut exams: Vec<GetExam> = vec![];
 
     while let Some(exam) = exam_creator_exams_prod.try_next().await? {
-        let exam: prisma::ExamCreatorExam = exam.try_into()?;
+        let exam: prisma::ExamCreatorExam = prisma::ExamCreatorExam::from_bson_document(exam)?;
         let mut database_environments = vec![];
 
         if state
@@ -75,7 +75,7 @@ pub async fn get_exams(
 
 #[instrument(skip_all, err(Debug))]
 pub async fn get_exam_by_id(
-    _auth_user: prisma::ExamCreatorUser,
+    _auth_user: crate::extractor::AuthUser,
     State(state): State<ServerState>,
     Path(exam_id): Path<ObjectId>,
 ) -> Result<Json<prisma::ExamCreatorExam>, Error> {
@@ -108,7 +108,7 @@ pub async fn get_exam_by_id(
 /// Create an exam
 #[instrument(skip_all, err(Debug))]
 pub async fn post_exam(
-    _: prisma::ExamCreatorUser,
+    _: crate::extractor::AuthUser,
     State(state): State<ServerState>,
 ) -> Result<Json<prisma::ExamCreatorExam>, Error> {
     info!("post_exam");
@@ -126,7 +126,7 @@ pub async fn post_exam(
 /// Update an exam
 #[instrument(skip_all, err(Debug))]
 pub async fn put_exam(
-    _: prisma::ExamCreatorUser,
+    _: crate::extractor::AuthUser,
     State(state): State<ServerState>,
     Path(exam_id): Path<ObjectId>,
     Json(exam): Json<prisma::ExamCreatorExam>,
@@ -156,7 +156,7 @@ pub async fn put_exam(
 /// NOTE: Staging has a special case where the `ExamEnvironmentChallenge` documents need to be copied over
 #[instrument(skip_all, err(Debug))]
 pub async fn put_exam_by_id_to_staging(
-    _auth_user: prisma::ExamCreatorUser,
+    _auth_user: crate::extractor::AuthUser,
     State(state): State<ServerState>,
     Path(exam_id): Path<ObjectId>,
 ) -> Result<(), Error> {
@@ -216,7 +216,7 @@ pub async fn put_exam_by_id_to_staging(
 /// Upserts it into production database `ExamEnvironmentExam`
 #[instrument(skip_all, err(Debug))]
 pub async fn put_exam_by_id_to_production(
-    _auth_user: prisma::ExamCreatorUser,
+    _auth_user: crate::extractor::AuthUser,
     State(state): State<ServerState>,
     Path(exam_id): Path<ObjectId>,
 ) -> Result<(), Error> {

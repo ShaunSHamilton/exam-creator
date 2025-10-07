@@ -18,7 +18,7 @@ static _EXAM_ROOMS: Lazy<Mutex<HashMap<String, broadcast::Sender<String>>>> =
 
 pub async fn _handle_exam_ws(
     socket: WebSocket,
-    auth_user: prisma::ExamCreatorUser,
+    auth_user: crate::extractor::AuthUser,
     state: ServerState,
     exam_id: String,
 ) {
@@ -84,7 +84,7 @@ pub async fn _handle_exam_ws(
 
 pub async fn handle_users_ws(
     socket: WebSocket,
-    auth_user: prisma::ExamCreatorUser,
+    auth_user: crate::extractor::AuthUser,
     state: ServerState,
 ) {
     let (mut sender, mut receiver) = socket.split();

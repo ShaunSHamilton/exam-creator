@@ -2,6 +2,25 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Architecture**: Extracted Prisma type definitions into separate `prisma-types` library crate
+  - Created new `prisma-types` workspace member for reusable type definitions
+  - Moved all Prisma schema imports and type definitions to library
+  - Added `ExamCreatorExam::from_bson_document()` helper method for BSON deserialization
+  - Introduced `AuthUser` newtype wrapper for authentication extractor to comply with orphan rules
+  - Created `ExamCreatorUserExt` trait for server-specific user methods
+  - Updated all route handlers to use `AuthUser` instead of direct `ExamCreatorUser`
+  - Converted project to Cargo workspace with `server` and `prisma-types` members
+  - Added `PartialEq` derive to Prisma types for comparison operations
+
+### Technical Details
+
+- The `prisma-types` library is now a standalone crate that can be consumed by other Rust applications
+- Server-specific trait implementations remain in the server crate to avoid orphan rule violations
+- Error handling updated to support boxed errors from library helper methods
+- Field name normalization: `r#type` → `_type` for consistency with generated types
+
 ## [2.0.5] - 2025-10-06
 
 ### Fixed

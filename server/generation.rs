@@ -29,9 +29,7 @@ struct QuestionSetConfigWithQuestions {
 const TIMEOUT_IN_MS: u64 = 5_000;
 
 /// Generates an exam for the user, based on the exam configuration.
-pub fn generate_exam(
-    exam: ExamInput,
-) -> Result<ExamEnvironmentGeneratedExam, Error> {
+pub fn generate_exam(exam: ExamInput) -> Result<ExamEnvironmentGeneratedExam, Error> {
     let start_time = Instant::now();
     let timeout = Duration::from_millis(TIMEOUT_IN_MS);
 
@@ -71,7 +69,7 @@ pub fn generate_exam(
     for config in exam.config.question_sets.iter() {
         if let Some(type_group) = type_converted_question_sets_config
             .iter_mut()
-            .find(|group| group.first().map(|c| &c.r#type) == Some(&config.r#type))
+            .find(|group| group.first().map(|c| &c._type) == Some(&config._type))
         {
             type_group.push(config.clone());
         } else {
@@ -85,7 +83,10 @@ pub fn generate_exam(
     }
 
     let sorted_question_sets_config: Vec<ExamEnvironmentQuestionSetConfig> =
-        type_converted_question_sets_config.into_iter().flatten().collect();
+        type_converted_question_sets_config
+            .into_iter()
+            .flatten()
+            .collect();
 
     // Move all questions from set that are used to fulfill tag config.
     let mut question_sets_config_with_questions: Vec<QuestionSetConfigWithQuestions> =
@@ -106,7 +107,7 @@ pub fn generate_exam(
         'sorted_tag_config_loop: for tag_config in sorted_tag_config.iter_mut() {
             for question_set in shuffled_question_sets
                 .iter_mut()
-                .filter(|sqs| sqs.r#type == qsc_with_qs.config.r#type)
+                .filter(|sqs| sqs._type == qsc_with_qs.config._type)
             {
                 // If questionSet does not have enough questions for config, do not consider.
                 if qsc_with_qs.config.number_of_questions > question_set.questions.len() as i64 {
@@ -201,7 +202,7 @@ pub fn generate_exam(
                 let question_set = shuffled_question_sets
                     .iter()
                     .find(|qs| {
-                        if qs.r#type == qsc_with_qs.config.r#type {
+                        if qs._type == qsc_with_qs.config._type {
                             if qs.questions.len() >= qsc_with_qs.config.number_of_questions as usize
                             {
                                 let questions: Vec<&ExamEnvironmentMultipleChoiceQuestion> = qs
@@ -230,7 +231,7 @@ pub fn generate_exam(
                     .ok_or_else(|| {
                         Error::Generation(format!(
                             "Invalid Exam Configuration for {}. Not enough questions for question type {:?}.",
-                            exam.id, qsc_with_qs.config.r#type
+                            exam.id, qsc_with_qs.config._type
                         ))
                     })?;
 
@@ -280,7 +281,7 @@ pub fn generate_exam(
                             .ok_or_else(|| {
                                 Error::Generation(format!(
                                     "Invalid Exam Configuration for {}. Not enough questions for question type {:?}.",
-                                    exam.id, qsc_with_qs.config.r#type
+                                    exam.id, qsc_with_qs.config._type
                                 ))
                             })?
                             .questions
@@ -360,11 +361,9 @@ pub fn generate_exam(
                         .questions
                         .into_iter()
                         .map(|q| {
-                            let answers: Vec<ObjectId> = q.answers.into_iter().map(|a| a.id).collect();
-                            ExamEnvironmentGeneratedMultipleChoiceQuestion {
-                                id: q.id,
-                                answers,
-                            }
+                            let answers: Vec<ObjectId> =
+                                q.answers.into_iter().map(|a| a.id).collect();
+                            ExamEnvironmentGeneratedMultipleChoiceQuestion { id: q.id, answers }
                         })
                         .collect();
                     ExamEnvironmentGeneratedQuestionSet {
@@ -386,9 +385,10 @@ pub fn generate_exam(
 
 fn is_question_set_config_fulfilled(qsc_with_qs: &QuestionSetConfigWithQuestions) -> bool {
     qsc_with_qs.config.number_of_set as usize == qsc_with_qs.question_sets.len()
-        && qsc_with_qs.question_sets.iter().all(|qs| {
-            qs.questions.len() == qsc_with_qs.config.number_of_questions as usize
-        })
+        && qsc_with_qs
+            .question_sets
+            .iter()
+            .all(|qs| qs.questions.len() == qsc_with_qs.config.number_of_questions as usize)
 }
 
 /// Gets random answers for a question.

@@ -1,0 +1,14 @@
+[package]
+name = "prisma-types"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+bson = { version = "3", features = ["chrono-0_4", "serde_with-3", "serde"] }
+mongodb = { version = "3.3", features = ["bson-3"] }
+prisma-rust-schema = { git = "https://github.com/ShaunSHamilton/prisma-rust-schema.git", version = "2.1.1", features = [
+  "bson",
+  "mongodb",
+] }
+serde = { version = "1", features = ["derive"] }

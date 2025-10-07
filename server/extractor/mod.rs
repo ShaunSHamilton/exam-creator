@@ -19,7 +19,33 @@ use crate::{
     state::{Activity, ServerState, User},
 };
 
-impl<S> FromRequestParts<S> for prisma::ExamCreatorUser
+/// Newtype wrapper for authenticated user extraction
+/// This allows us to implement FromRequestParts without violating orphan rules
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+pub struct AuthUser(pub prisma::ExamCreatorUser);
+
+impl std::ops::Deref for AuthUser {
+    type Target = prisma::ExamCreatorUser;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl std::ops::DerefMut for AuthUser {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+// Forward the ExamCreatorUserExt trait to the inner type
+impl crate::database::ExamCreatorUserExt for AuthUser {
+    fn to_session(&self, users: &Vec<User>) -> User {
+        self.0.to_session(users)
+    }
+}
+
+impl<S> FromRequestParts<S> for AuthUser
 where
     S: Send + Sync,
     ServerState: FromRef<S>,
@@ -90,7 +116,7 @@ where
             });
         }
 
-        Ok(user)
+        Ok(AuthUser(user))
     }
 }
 
@@ -151,6 +177,6 @@ pub async fn ws_handler_users(
             format!("user not found: {}", session.user_id),
         ))?;
 
-    let upgrade_res = ws.on_upgrade(move |socket| handle_users_ws(socket, user, state));
+    let upgrade_res = ws.on_upgrade(move |socket| handle_users_ws(socket, AuthUser(user), state));
     Ok(upgrade_res)
 }
