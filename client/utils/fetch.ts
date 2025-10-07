@@ -3,6 +3,7 @@ import type {
   ExamEnvironmentChallenge,
   ExamEnvironmentExamModeration,
   ExamEnvironmentExamModerationStatus,
+  ExamEnvironmentGeneratedExam,
 } from "@prisma/client";
 import type {
   Attempt,
@@ -571,6 +572,33 @@ export async function getStatusPing() {
   });
 
   return res.text();
+}
+
+/**
+ * Generate an exam based on the exam configuration
+ */
+export async function postGenerateExam(
+  examId: ExamCreatorExam["id"]
+): Promise<ExamEnvironmentGeneratedExam> {
+  if (import.meta.env.VITE_MOCK_DATA === "true") {
+    await delayForTesting(300);
+
+    const generatedExam: ExamEnvironmentGeneratedExam = {
+      id: examId,
+      examId: examId,
+      questionSets: [],
+      deprecated: false,
+      version: 1,
+    };
+    return generatedExam;
+  }
+
+  const res = await authorizedFetch(`/api/exams/${examId}/generate`, {
+    method: "POST",
+  });
+  const json = await res.json();
+  const deserialized = deserializeToPrisma<ExamEnvironmentGeneratedExam>(json);
+  return deserialized;
 }
 
 export async function delayForTesting(t: number) {

@@ -6,6 +6,7 @@ import { moderationsRoute } from "../pages/moderations";
 import { editAttemptRoute } from "../pages/edit-attempt";
 import { editExamRoute } from "../pages/edit-exam";
 import { examsRoute } from "../pages/exams";
+import { generationsRoute } from "../pages/generations";
 import { landingRoute } from "../pages/landing";
 import { loginRoute } from "../pages/login";
 import { rootRoute } from "../pages/root";
@@ -18,6 +19,7 @@ export const routeTree = rootRoute.addChildren([
   editAttemptRoute,
   editExamRoute,
   examsRoute,
+  generationsRoute,
   landingRoute,
   loginRoute,
 ]);

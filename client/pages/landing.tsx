@@ -20,6 +20,7 @@ import { ProtectedRoute } from "../components/protected-route";
 import { UsersWebSocketContext } from "../contexts/users-websocket";
 import { AuthContext } from "../contexts/auth";
 import { examsRoute } from "./exams";
+import { generationsRoute } from "./generations";
 import { moderationsRoute } from "./moderations";
 import { LandingCard } from "../components/landing-card";
 
@@ -47,6 +48,8 @@ export function Landing() {
     users.filter((u) => u.activity.page.pathname?.startsWith("/attempt")) ?? [];
   const usersOnExams =
     users.filter((u) => u.activity.page.pathname?.startsWith("/exam")) ?? [];
+  const usersOnGenerations =
+    users.filter((u) => u.activity.page.pathname?.startsWith("/generation")) ?? [];
 
   return (
     <Box minH="100vh" bg={bg} py={12} px={4}>
@@ -132,6 +135,22 @@ export function Landing() {
                 p={0}
               >
                 <LandingCard filteredUsers={usersOnExams}>Exams</LandingCard>
+              </Button>
+              <Button
+                onClick={() => navigate({ to: generationsRoute.to })}
+                _hover={{ boxShadow: "xl", transform: "translateY(-2px)" }}
+                borderRadius="xl"
+                transition="all 0.15s"
+                display="block"
+                textAlign="left"
+                variant="unstyled"
+                w="full"
+                h="auto"
+                p={0}
+              >
+                <LandingCard filteredUsers={usersOnGenerations}>
+                  Generations
+                </LandingCard>
               </Button>
               <Button
                 onClick={() => navigate({ to: moderationsRoute.to })}

@@ -157,6 +157,10 @@ pub async fn app(env_vars: EnvVars) -> Result<Router, Error> {
             "/api/exams/{exam_id}/seed/production",
             put(routes::exams::put_exam_by_id_to_production),
         )
+        .route(
+            "/api/exams/{exam_id}/generate",
+            post(routes::generation::post_generate_exam),
+        )
         .route("/api/attempts", get(routes::attempts::get_attempts))
         .route(
             "/api/attempts/{attempt_id}",
@@ -202,6 +206,7 @@ pub async fn app(env_vars: EnvVars) -> Result<Router, Error> {
         .route_service("/attempts/{*id}", ServeFile::new("dist/index.html"))
         .route_service("/exams", ServeFile::new("dist/index.html"))
         .route_service("/exams/{*id}", ServeFile::new("dist/index.html"))
+        .route_service("/generations", ServeFile::new("dist/index.html"))
         .route_service("/login", ServeFile::new("dist/index.html"))
         .layer(cors)
         .layer(session_layer)

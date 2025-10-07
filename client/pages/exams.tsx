@@ -31,6 +31,7 @@ import {
   CodeXml,
   AppWindow,
   Trash2,
+  Sparkles,
 } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createRoute, useNavigate } from "@tanstack/react-router";
@@ -50,6 +51,7 @@ import { editExamRoute } from "./edit-exam";
 import { UsersWebSocketContext } from "../contexts/users-websocket";
 import { AuthContext } from "../contexts/auth";
 import { landingRoute } from "./landing";
+import { generationsRoute } from "./generations";
 import { serializeFromPrisma } from "../utils/serde";
 import {
   SeedProductionModal,
@@ -299,6 +301,16 @@ export function Exams() {
               )}
             </HStack>
             <HStack spacing={4} ml={8}>
+              <Button
+                leftIcon={<Sparkles size={18} />}
+                colorScheme="purple"
+                variant="outline"
+                px={6}
+                fontWeight="bold"
+                onClick={() => navigate({ to: generationsRoute.to })}
+              >
+                Generate Exams
+              </Button>
               <Button
                 leftIcon={selectionMode ? <X size={18} /> : undefined}
                 colorScheme={selectionMode ? "red" : "blue"}
