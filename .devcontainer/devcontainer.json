@@ -4,6 +4,13 @@
 		"context": ".",
 		"dockerfile": "Dockerfile"
 	},
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"version": "latest",
+			"moby": true,
+			"dockerDashComposeVersion": "v2"
+		}
+	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -12,8 +19,8 @@
 				"serayuzgur.crates",
 				"dbaeumer.vscode-eslint",
 				"esbenp.prettier-vscode",
-				"bradlc.vscode-tailwindcss",
-				"Prisma.prisma"
+				"Prisma.prisma",
+				"ms-azuretools.vscode-docker"
 			],
 			"settings": {
 				"rust-analyzer.checkOnSave.command": "clippy",
@@ -33,7 +40,7 @@
 			}
 		}
 	},
-	"forwardPorts": [8080, 5173],
+	"forwardPorts": [8080, 5173, 27017],
 	"portsAttributes": {
 		"8080": {
 			"label": "Backend Server",
@@ -42,7 +49,14 @@
 		"5173": {
 			"label": "Vite Dev Server",
 			"onAutoForward": "notify"
+		},
+		"27017": {
+			"label": "MongoDB",
+			"onAutoForward": "silent"
 		}
 	},
-	"postCreateCommand": "bun install && cargo fetch"
+	"remoteUser": "vscode",
+	"mounts": [
+		"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+	]
 }
