@@ -1,4 +1,4 @@
-use mongodb::{bson::doc, options::ClientOptions, Client, Collection};
+use mongodb::{Client, Collection, bson::doc, options::ClientOptions};
 use prisma_types::*;
 use proptest::{prelude::*, strategy::ValueTree};
 use std::error::Error;
@@ -51,8 +51,8 @@ async fn get_client(env: &str) -> Result<Client, Box<dyn Error>> {
         _ => "MONGODB_URI_STAGING",
     };
 
-    let uri = std::env::var(uri_key)
-        .map_err(|_| format!("{} environment variable not set", uri_key))?;
+    let uri =
+        std::env::var(uri_key).map_err(|_| format!("{} environment variable not set", uri_key))?;
 
     let client_options = ClientOptions::parse(&uri).await?;
     Ok(Client::with_options(client_options)?)
@@ -60,8 +60,8 @@ async fn get_client(env: &str) -> Result<Client, Box<dyn Error>> {
 
 /// Fetch existing exam IDs from the database
 async fn get_existing_exam_ids(client: &Client) -> Result<Vec<ObjectId>, Box<dyn Error>> {
-    let db = client.database("exam-environment");
-    let collection: Collection<ExamEnvironmentExam> = db.collection("Exam");
+    let db = client.database("freecodecamp");
+    let collection: Collection<ExamCreatorExam> = db.collection("ExamCreatorExam");
 
     let mut cursor = collection.find(doc! {}).await?;
     let mut ids = Vec::new();
@@ -77,8 +77,8 @@ async fn get_existing_exam_ids(client: &Client) -> Result<Vec<ObjectId>, Box<dyn
 
 /// Fetch existing user IDs from the database
 async fn get_existing_user_ids(client: &Client) -> Result<Vec<ObjectId>, Box<dyn Error>> {
-    let db = client.database("exam-creator");
-    let collection: Collection<ExamCreatorUser> = db.collection("User");
+    let db = client.database("freecodecamp");
+    let collection: Collection<ExamCreatorUser> = db.collection("ExamCreatorUser");
 
     let mut cursor = collection.find(doc! {}).await?;
     let mut ids = Vec::new();
@@ -93,11 +93,10 @@ async fn get_existing_user_ids(client: &Client) -> Result<Vec<ObjectId>, Box<dyn
 }
 
 /// Fetch existing generated exam IDs from the database
-async fn get_existing_generated_exam_ids(
-    client: &Client,
-) -> Result<Vec<ObjectId>, Box<dyn Error>> {
-    let db = client.database("exam-environment");
-    let collection: Collection<ExamEnvironmentGeneratedExam> = db.collection("GeneratedExam");
+async fn get_existing_generated_exam_ids(client: &Client) -> Result<Vec<ObjectId>, Box<dyn Error>> {
+    let db = client.database("freecodecamp");
+    let collection: Collection<ExamEnvironmentGeneratedExam> =
+        db.collection("ExamEnvironmentGeneratedExam");
 
     let mut cursor = collection.find(doc! {}).await?;
     let mut ids = Vec::new();
@@ -115,8 +114,8 @@ async fn seed_exams(count: usize, env: &str) -> Result<(), Box<dyn Error>> {
     info!("📝 Seeding {} exams...", count);
 
     let client = get_client(env).await?;
-    let db = client.database("exam-creator");
-    let collection: Collection<ExamCreatorExam> = db.collection("Exam");
+    let db = client.database("freecodecamp");
+    let collection: Collection<ExamCreatorExam> = db.collection("ExamCreatorExam");
 
     let mut runner = proptest::test_runner::TestRunner::default();
 
@@ -137,8 +136,8 @@ async fn seed_users(count: usize, env: &str) -> Result<(), Box<dyn Error>> {
     info!("👤 Seeding {} users...", count);
 
     let client = get_client(env).await?;
-    let db = client.database("exam-creator");
-    let collection: Collection<ExamCreatorUser> = db.collection("User");
+    let db = client.database("freecodecamp");
+    let collection: Collection<ExamCreatorUser> = db.collection("ExamCreatorUser");
 
     let mut runner = proptest::test_runner::TestRunner::default();
 
@@ -159,8 +158,9 @@ async fn seed_attempts(count: usize, env: &str) -> Result<(), Box<dyn Error>> {
     info!("📋 Seeding {} exam attempts...", count);
 
     let client = get_client(env).await?;
-    let db = client.database("exam-environment");
-    let collection: Collection<ExamEnvironmentExamAttempt> = db.collection("ExamAttempt");
+    let db = client.database("freecodecamp");
+    let collection: Collection<ExamEnvironmentExamAttempt> =
+        db.collection("ExamEnvironmentExamAttempt");
 
     let exam_ids = get_existing_exam_ids(&client).await?;
     let user_ids = get_existing_user_ids(&client).await?;
@@ -173,14 +173,11 @@ async fn seed_attempts(count: usize, env: &str) -> Result<(), Box<dyn Error>> {
     let mut runner = proptest::test_runner::TestRunner::default();
 
     for i in 0..count {
-        let attempt = strategies::exam_attempt_with_ids_strategy(
-            &exam_ids,
-            &user_ids,
-            &generated_exam_ids,
-        )
-        .new_tree(&mut runner)
-        .map_err(|e| format!("Failed to generate attempt tree: {}", e))?
-        .current();
+        let attempt =
+            strategies::exam_attempt_with_ids_strategy(&exam_ids, &user_ids, &generated_exam_ids)
+                .new_tree(&mut runner)
+                .map_err(|e| format!("Failed to generate attempt tree: {}", e))?
+                .current();
 
         collection.insert_one(attempt).await?;
         info!("  ✓ Inserted exam attempt {}/{}", i + 1, count);
@@ -193,8 +190,9 @@ async fn seed_generated_exams(count: usize, env: &str) -> Result<(), Box<dyn Err
     info!("🎲 Seeding {} generated exams...", count);
 
     let client = get_client(env).await?;
-    let db = client.database("exam-environment");
-    let collection: Collection<ExamEnvironmentGeneratedExam> = db.collection("GeneratedExam");
+    let db = client.database("freecodecamp");
+    let collection: Collection<ExamEnvironmentGeneratedExam> =
+        db.collection("ExamEnvironmentGeneratedExam");
 
     let exam_ids = get_existing_exam_ids(&client).await?;
 
@@ -221,8 +219,9 @@ async fn seed_challenges(count: usize, env: &str) -> Result<(), Box<dyn Error>> 
     info!("🎯 Seeding {} challenges...", count);
 
     let client = get_client(env).await?;
-    let db = client.database("exam-environment");
-    let collection: Collection<ExamEnvironmentChallenge> = db.collection("Challenge");
+    let db = client.database("freecodecamp");
+    let collection: Collection<ExamEnvironmentChallenge> =
+        db.collection("ExamEnvironmentChallenge");
 
     let exam_ids = get_existing_exam_ids(&client).await?;
 
