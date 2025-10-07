@@ -107,7 +107,7 @@ pub fn generate_exam(exam: ExamInput) -> Result<ExamEnvironmentGeneratedExam, Er
         'sorted_tag_config_loop: for tag_config in sorted_tag_config.iter_mut() {
             // Collect questions to remove (question_set_id, question_id)
             let mut questions_to_remove: Vec<(ObjectId, ObjectId)> = Vec::new();
-            
+
             for question_set in shuffled_question_sets
                 .iter_mut()
                 .filter(|sqs| sqs._type == qsc_with_qs.config._type)
@@ -126,7 +126,7 @@ pub fn generate_exam(exam: ExamInput) -> Result<ExamEnvironmentGeneratedExam, Er
                 }
 
                 // Store question_set id and metadata before mutable borrow
-                let question_set_id = question_set.id.clone();
+                let question_set_id = question_set.id;
                 let question_set_type = question_set._type.clone();
                 let question_set_context = question_set.context.clone();
 
@@ -178,7 +178,7 @@ pub fn generate_exam(exam: ExamInput) -> Result<ExamEnvironmentGeneratedExam, Er
                             }
                             // Create new question set from stored metadata
                             let new_question_set = ExamEnvironmentQuestionSet {
-                                id: question_set_id.clone(),
+                                id: question_set_id,
                                 _type: question_set_type.clone(),
                                 context: question_set_context.clone(),
                                 questions: vec![question_with_correct_number_of_answers],
@@ -187,13 +187,13 @@ pub fn generate_exam(exam: ExamInput) -> Result<ExamEnvironmentGeneratedExam, Er
                         }
 
                         // Mark question for removal
-                        questions_to_remove.push((question_set_id.clone(), question.id.clone()));
+                        questions_to_remove.push((question_set_id, question.id));
 
                         tag_config.number_of_questions -= 1;
                     }
                 }
             }
-            
+
             // Remove marked questions after iteration
             for (qs_id, q_id) in questions_to_remove {
                 if let Some(qs) = shuffled_question_sets.iter_mut().find(|qs| qs.id == qs_id) {
@@ -216,8 +216,7 @@ pub fn generate_exam(exam: ExamInput) -> Result<ExamEnvironmentGeneratedExam, Er
                 let question_set = shuffled_question_sets
                     .iter()
                     .find(|qs| {
-                        if qs._type == qsc_with_qs.config._type {
-                            if qs.questions.len() >= qsc_with_qs.config.number_of_questions as usize
+                        if qs._type == qsc_with_qs.config._type && qs.questions.len() >= qsc_with_qs.config.number_of_questions as usize
                             {
                                 let questions: Vec<&ExamEnvironmentMultipleChoiceQuestion> = qs
                                     .questions
@@ -238,8 +237,8 @@ pub fn generate_exam(exam: ExamInput) -> Result<ExamEnvironmentGeneratedExam, Er
 
                                 return questions.len()
                                     >= qsc_with_qs.config.number_of_questions as usize;
-                            }
                         }
+                        
                         false
                     })
                     .cloned()

@@ -8,7 +8,7 @@ pub enum Error {
     #[error("{0}")]
     Generation(String),
     #[error("{0}")]
-    BoxedError(Box<dyn std::error::Error + Send + Sync>),
+    Boxed(Box<dyn std::error::Error + Send + Sync>),
     // Froms
     #[error("{0}")]
     MongoDB(#[from] mongodb::error::Error),
@@ -30,13 +30,13 @@ pub enum Error {
 
 impl From<Box<dyn std::error::Error + Send + Sync>> for Error {
     fn from(error: Box<dyn std::error::Error + Send + Sync>) -> Self {
-        Error::BoxedError(error)
+        Error::Boxed(error)
     }
 }
 
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
-        let msg = format!("{}", self.to_string());
+        let msg = self.to_string();
         let status: StatusCode = self.into();
 
         (status, msg).into_response()
@@ -48,7 +48,7 @@ impl From<Error> for StatusCode {
         match error {
             Error::Server(c, _) => c,
             Error::Generation(_) => StatusCode::BAD_REQUEST,
-            Error::BoxedError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::Boxed(_) => StatusCode::INTERNAL_SERVER_ERROR,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

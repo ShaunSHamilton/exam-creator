@@ -85,6 +85,7 @@ pub async fn cleanup_online_users(
     }
 }
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "kebab-case", tag = "type", content = "data")]
 pub enum SocketEvents {

@@ -290,10 +290,10 @@ pub fn construct_attempt(
             };
 
             let attempt_question_set_question = AttemptQuestionSetQuestion {
-                id: id.clone(),
+                id: *id,
                 text: text.clone(),
                 tags: tags.clone(),
-                deprecated: deprecated.clone(),
+                deprecated: *deprecated,
                 audio: audio.clone(),
                 answers: answers.clone(),
                 selected,
@@ -304,7 +304,7 @@ pub fn construct_attempt(
         }
 
         let attempt_question_set = AttemptQuestionSet {
-            id: id.clone(),
+            id: *id,
             _type: _type.clone(),
             context: context.clone(),
             questions: attempt_questions,
@@ -319,14 +319,12 @@ pub fn construct_attempt(
         mongodb::bson::DateTime::from_millis(exam_attempt.start_time_in_m_s as i64)
     };
 
-    let attempt = Attempt {
+    Attempt {
         id: exam_attempt.id,
         prerequisites: prerequisites.clone(),
         deprecated: *deprecated,
         question_sets: attempt_question_sets,
         config: config.clone(),
         start_time,
-    };
-
-    attempt
+    }
 }
