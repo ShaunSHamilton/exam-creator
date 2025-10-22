@@ -33,16 +33,19 @@
 			}
 		}
 	},
-	"forwardPorts": [8080, 5173],
+	"forwardPorts": [3001, 1420],
 	"portsAttributes": {
-		"8080": {
+		"3001": {
 			"label": "Backend Server",
 			"onAutoForward": "notify"
 		},
-		"5173": {
+		"1420": {
 			"label": "Vite Dev Server",
 			"onAutoForward": "notify"
 		}
 	},
-	"postCreateCommand": "bun install && cargo fetch"
+	"postCreateCommand": "bun install && cargo fetch",
+	"remoteEnv": {
+		"PATH": "${containerEnv:PATH}:/home/vscode/.cargo/bin:/home/vscode/.bun/bin"
+	}
 }
