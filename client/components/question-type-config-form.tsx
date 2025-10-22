@@ -4,7 +4,7 @@ import {
   type ExamEnvironmentQuestionSet,
   type ExamEnvironmentQuestionType,
 } from "@prisma/client";
-import { useState } from "react";
+import { useState, memo } from "react";
 import {
   Box,
   Button,
@@ -24,7 +24,7 @@ type QuestionTypeConfigFormProps = {
   config: ExamEnvironmentConfig;
 };
 
-export function QuestionTypeConfigForm({
+export const QuestionTypeConfigForm = memo(function QuestionTypeConfigForm({
   questionSets,
   setExam,
   config,
@@ -185,4 +185,4 @@ export function QuestionTypeConfigForm({
       </Stack>
     </Box>
   );
-}
+});

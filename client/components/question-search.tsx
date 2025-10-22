@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { GiMagnifyingGlass } from "react-icons/gi";
 import {
   Input,
@@ -17,7 +17,7 @@ type QuestionSearchProps = {
   setSearchIds: (ids: string[]) => void;
 };
 
-export function QuestionSearch({
+export const QuestionSearch = memo(function QuestionSearch({
   exam,
   searchIds,
   setSearchIds,
@@ -139,4 +139,4 @@ export function QuestionSearch({
       </HStack>
     </Box>
   );
-}
+});

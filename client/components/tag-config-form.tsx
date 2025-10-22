@@ -3,7 +3,7 @@ import type {
   ExamCreatorExam,
   ExamEnvironmentQuestionSet,
 } from "@prisma/client";
-import { useState } from "react";
+import { useState, memo } from "react";
 import {
   Box,
   Button,
@@ -26,7 +26,7 @@ type TagConfigFormProps = {
   config: ExamEnvironmentConfig;
 };
 
-export function TagConfigForm({
+export const TagConfigForm = memo(function TagConfigForm({
   questionSets,
   setExam,
   config,
@@ -183,4 +183,4 @@ export function TagConfigForm({
       </Stack>
     </Box>
   );
-}
+});

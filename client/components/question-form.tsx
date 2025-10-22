@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, memo } from "react";
 import {
   ExamCreatorExam,
   type ExamEnvironmentMultipleChoiceQuestion,
@@ -58,7 +58,7 @@ type MultipleChoiceFormProps = {
   hasGeneratedExams?: boolean;
 };
 
-export function MultipleChoiceForm({
+export const MultipleChoiceForm = memo(function MultipleChoiceForm({
   question,
   questionSet,
   questionSets,
@@ -459,7 +459,7 @@ export function MultipleChoiceForm({
       </Stack>
     </Box>
   );
-}
+});
 
 type DialogueFormProps = {
   questionSet: ExamEnvironmentQuestionSet;
@@ -471,7 +471,7 @@ type DialogueFormProps = {
   hasGeneratedExams: boolean;
 };
 
-export function DialogueForm({
+export const DialogueForm = memo(function DialogueForm({
   questionSet,
   questionSets,
   setExam,
@@ -581,7 +581,7 @@ export function DialogueForm({
       </Stack>
     </Box>
   );
-}
+});
 
 function getAnswerStatus(
   answerId: string,
@@ -752,7 +752,7 @@ type QuestionFormProps = {
   >;
 };
 
-export function QuestionForm({
+export const QuestionForm = memo(function QuestionForm({
   searchIds,
   questionSets,
   setExam,
@@ -905,4 +905,4 @@ export function QuestionForm({
       </Stack>
     </Box>
   );
-}
+});

@@ -1,4 +1,4 @@
-import { useState, useContext, useReducer, useEffect } from "react";
+import { useState, useContext, useReducer, useEffect, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createRoute, useParams, useNavigate } from "@tanstack/react-router";
 import {
@@ -164,8 +164,12 @@ function UsersEditing() {
   );
 }
 
-function examReducer(state: ExamCreatorExam, action: Partial<ExamCreatorExam>) {
-  const newState = { ...state, ...action };
+function examReducer(
+  state: ExamCreatorExam,
+  action: Partial<ExamCreatorExam> | ((prev: ExamCreatorExam) => Partial<ExamCreatorExam>)
+) {
+  const update = typeof action === "function" ? action(state) : action;
+  const newState = { ...state, ...update };
   return newState;
 }
 
@@ -243,18 +247,84 @@ function EditExam({ exam: examData }: EditExamProps) {
   const accent = useColorModeValue("teal.400", "teal.300");
 
   // { [type]: { numberOfSet: number, numberOfQuestions: number } }
-  const questionsBySet = exam.questionSets.reduce((acc, qs) => {
-    if (qs.type in acc) {
-      acc[qs.type].numberOfSet += 1;
-      acc[qs.type].numberOfQuestions += qs.questions.length;
-    } else {
-      acc[qs.type] = {
-        numberOfSet: 1,
-        numberOfQuestions: qs.questions.length,
-      };
-    }
-    return acc;
-  }, {} as { [key: string]: { numberOfSet: number; numberOfQuestions: number } });
+  const questionsBySet = useMemo(() => {
+    return exam.questionSets.reduce((acc, qs) => {
+      if (qs.type in acc) {
+        acc[qs.type].numberOfSet += 1;
+        acc[qs.type].numberOfQuestions += qs.questions.length;
+      } else {
+        acc[qs.type] = {
+          numberOfSet: 1,
+          numberOfQuestions: qs.questions.length,
+        };
+      }
+      return acc;
+    }, {} as { [key: string]: { numberOfSet: number; numberOfQuestions: number } });
+  }, [exam.questionSets]);
+
+  // Memoized update handlers to prevent child component rerenders
+  // Using stable callbacks that don't depend on exam state
+  const updateConfigName = useCallback((name: string) => {
+    setExam((prev) => ({
+      config: {
+        ...prev.config,
+        name,
+      },
+    }));
+  }, []);
+
+  const updateConfigNote = useCallback((note: string) => {
+    setExam((prev) => ({
+      config: {
+        ...prev.config,
+        note,
+      },
+    }));
+  }, []);
+
+  const updateConfigTotalTime = useCallback((totalTimeInS: number) => {
+    setExam((prev) => ({
+      config: {
+        ...prev.config,
+        totalTimeInS,
+      },
+    }));
+  }, []);
+
+  const updateConfigRetakeTime = useCallback((retakeTimeInS: number) => {
+    setExam((prev) => ({
+      config: {
+        ...prev.config,
+        retakeTimeInS,
+      },
+    }));
+  }, []);
+
+  const updatePrerequisites = useCallback((prerequisites: string[]) => {
+    setExam({ prerequisites });
+  }, []);
+
+  const updateDeprecated = useCallback((deprecated: boolean) => {
+    setExam({ deprecated });
+  }, []);
+
+  const removeTagConfig = useCallback((index: number) => {
+    setExam((prev) => ({
+      config: {
+        ...prev.config,
+        tags: prev.config.tags.filter((_, i) => i !== index),
+      },
+    }));
+  }, []);
+
+  const removeQuestionSetConfig = useCallback((index: number) => {
+    setExam((prev) => ({
+      config: {
+        ...prev.config,
+        questionSets: prev.config.questionSets.filter((_, i) => i !== index),
+      },
+    }));
+  }, []);
 
   return (
     <>
@@ -281,14 +351,7 @@ function EditExam({ exam: examData }: EditExamProps) {
                   type="text"
                   placeholder="Exam Name..."
                   value={exam.config.name}
-                  onChange={(e) =>
-                    setExam({
-                      config: {
-                        ...exam.config,
-                        name: e.target.value,
-                      },
-                    })
-                  }
+                  onChange={(e) => updateConfigName(e.target.value)}
                   bg="gray.700"
                   color="gray.100"
                 />
@@ -299,14 +362,7 @@ function EditExam({ exam: examData }: EditExamProps) {
                   type="text"
                   placeholder="Accessibility Note..."
                   value={exam.config.note}
-                  onChange={(e) =>
-                    setExam({
-                      config: {
-                        ...exam.config,
-                        note: e.target.value,
-                      },
-                    })
-                  }
+                  onChange={(e) => updateConfigNote(e.target.value)}
                   bg="gray.700"
                   color="gray.100"
                 />
@@ -315,14 +371,7 @@ function EditExam({ exam: examData }: EditExamProps) {
                 <FormLabel color="gray.300">Total Time [s]</FormLabel>
                 <NumberInput
                   value={exam.config.totalTimeInS}
-                  onChange={(_, value) =>
-                    setExam({
-                      config: {
-                        ...exam.config,
-                        totalTimeInS: value,
-                      },
-                    })
-                  }
+                  onChange={(_, value) => updateConfigTotalTime(value)}
                   min={0}
                 >
                   <NumberInputField bg="gray.700" color="gray.100" />
@@ -334,14 +383,7 @@ function EditExam({ exam: examData }: EditExamProps) {
                 </FormLabel>
                 <NumberInput
                   value={exam.config.retakeTimeInS}
-                  onChange={(_, value) =>
-                    setExam({
-                      config: {
-                        ...exam.config,
-                        retakeTimeInS: value,
-                      },
-                    })
-                  }
+                  onChange={(_, value) => updateConfigRetakeTime(value)}
                   min={0}
                 >
                   <NumberInputField bg="gray.700" color="gray.100" />
@@ -366,9 +408,7 @@ function EditExam({ exam: examData }: EditExamProps) {
                         ObjectId.isValid(value) &&
                         !exam.prerequisites.includes(value)
                       ) {
-                        setExam({
-                          prerequisites: [...exam.prerequisites, value],
-                        });
+                        updatePrerequisites([...exam.prerequisites, value]);
                         setPrereqInput("");
                       }
                     }
@@ -409,11 +449,9 @@ function EditExam({ exam: examData }: EditExamProps) {
                         variant="ghost"
                         ml={1}
                         onClick={() => {
-                          setExam({
-                            prerequisites: exam.prerequisites.filter(
-                              (_, i) => i !== idx
-                            ),
-                          });
+                          updatePrerequisites(
+                            exam.prerequisites.filter((_, i) => i !== idx)
+                          );
                         }}
                       />
                     </Badge>
@@ -520,11 +558,7 @@ function EditExam({ exam: examData }: EditExamProps) {
                 <FormLabel color="gray.300">Deprecated</FormLabel>
                 <Checkbox
                   isChecked={exam.deprecated}
-                  onChange={(e) =>
-                    setExam({
-                      deprecated: e.target.checked,
-                    })
-                  }
+                  onChange={(e) => updateDeprecated(e.target.checked)}
                   bg="gray.700"
                   color="gray.100"
                   colorScheme="red"
@@ -612,14 +646,7 @@ function EditExam({ exam: examData }: EditExamProps) {
                   ml={2}
                   colorScheme="red"
                   variant="ghost"
-                  onClick={() => {
-                    setExam({
-                      config: {
-                        ...exam.config,
-                        tags: exam.config.tags.filter((_, i) => i !== index),
-                      },
-                    });
-                  }}
+                  onClick={() => removeTagConfig(index)}
                 />
               </Box>
             ))}
@@ -645,16 +672,7 @@ function EditExam({ exam: examData }: EditExamProps) {
                   size="xs"
                   colorScheme="red"
                   mt={1}
-                  onClick={() =>
-                    setExam({
-                      config: {
-                        ...exam.config,
-                        questionSets: exam.config.questionSets.filter(
-                          (_, i) => i !== index
-                        ),
-                      },
-                    })
-                  }
+                  onClick={() => removeQuestionSetConfig(index)}
                 >
                   Remove
                 </Button>

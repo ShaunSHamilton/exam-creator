@@ -15,13 +15,14 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { getGenerations } from "../utils/fetch";
 import { calculateGenerationMetrics } from "../utils/question";
+import { memo } from "react";
 
 interface EditExamGenerationVariabilityProps {
   generatedExamsStaging?: Awaited<ReturnType<typeof getGenerations>>;
   generatedExamsProduction?: Awaited<ReturnType<typeof getGenerations>>;
 }
 
-export function EditExamGenerationVariability({
+export const EditExamGenerationVariability = memo(function EditExamGenerationVariability({
   generatedExamsStaging,
   generatedExamsProduction,
 }: EditExamGenerationVariabilityProps) {
@@ -184,4 +185,4 @@ export function EditExamGenerationVariability({
       </Box>
     </>
   );
-}
+});

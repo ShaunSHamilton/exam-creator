@@ -10,13 +10,14 @@ import { putExamById, putExamEnvironmentChallenges } from "../utils/fetch";
 import { ExamCreatorExam, ExamEnvironmentChallenge } from "@prisma/client";
 import { useMutation } from "@tanstack/react-query";
 import { GenerateModal } from "./generate-modal";
+import { memo } from "react";
 
 interface EditExamActionsProps {
   exam: ExamCreatorExam;
   examEnvironmentChallenges: Omit<ExamEnvironmentChallenge, "id">[];
 }
 
-export function EditExamActions({
+export const EditExamActions = memo(function EditExamActions({
   exam,
   examEnvironmentChallenges,
 }: EditExamActionsProps) {
@@ -114,4 +115,4 @@ export function EditExamActions({
       />
     </Box>
   );
-}
+});
