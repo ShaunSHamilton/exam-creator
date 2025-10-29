@@ -133,6 +133,7 @@ sample.env       Environment variable template
 - `POST /api/exams` - Create exam
 - `GET /api/exams/{exam_id}` - Get exam
 - `PUT /api/exams/{exam_id}` - Update exam
+- `GET /api/exams/{exam_id}/environment/{database_environment}` - Get deployed exam from staging or production
 - `PUT /api/exams/{exam_id}/seed/staging` - Seed to staging
 - `PUT /api/exams/{exam_id}/seed/production` - Seed to production
 

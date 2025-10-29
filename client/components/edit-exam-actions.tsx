@@ -4,8 +4,10 @@ import {
   useColorModeValue,
   useDisclosure,
   useToast,
+  Select,
+  Text,
 } from "@chakra-ui/react";
-import { CodeXml, Save } from "lucide-react";
+import { CodeXml, Save, GitCompare } from "lucide-react";
 import {
   postValidateConfigByExamId,
   putExamById,
@@ -21,6 +23,8 @@ import { useMutation } from "@tanstack/react-query";
 import { GenerateModal } from "./generate-modal";
 import { deserializeToPrisma } from "../utils/serde";
 import { queryClient } from "../contexts";
+import { useContext } from "react";
+import { ExamDiffContext } from "../contexts/exam-diff";
 
 interface EditExamActionsProps {
   exam: ExamCreatorExam;
@@ -41,6 +45,8 @@ export function EditExamActions({
     onOpen: generateOnOpen,
     onClose: generateOnClose,
   } = useDisclosure();
+
+  const diffContext = useContext(ExamDiffContext);
 
   const invalidConfigMutation = useMutation({
     mutationFn: async (examId: string) => {
@@ -154,6 +160,42 @@ export function EditExamActions({
       >
         Generate Exams
       </Button>
+      {diffContext && (
+        <Box w="full">
+          <Button
+            leftIcon={<GitCompare size={18} />}
+            colorScheme={diffContext.isDiffMode ? "yellow" : "teal"}
+            variant={diffContext.isDiffMode ? "solid" : "outline"}
+            px={4}
+            fontWeight="bold"
+            w="full"
+            onClick={() => diffContext.setIsDiffMode(!diffContext.isDiffMode)}
+          >
+            {diffContext.isDiffMode ? "Hide" : "Show"} Diff
+          </Button>
+          {diffContext.isDiffMode && (
+            <Box mt={2} w="full">
+              <Text fontSize="xs" color="gray.400" mb={1}>
+                Compare with:
+              </Text>
+              <Select
+                size="sm"
+                value={diffContext.selectedEnvironment}
+                onChange={(e) =>
+                  diffContext.setSelectedEnvironment(
+                    e.target.value as "Staging" | "Production"
+                  )
+                }
+                bg="gray.700"
+                color="gray.100"
+              >
+                <option value="Staging">Staging</option>
+                <option value="Production">Production</option>
+              </Select>
+            </Box>
+          )}
+        </Box>
+      )}
       <GenerateModal
         isOpen={generateIsOpen}
         onClose={generateOnClose}

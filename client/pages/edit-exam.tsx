@@ -48,6 +48,8 @@ import { examsRoute } from "./exams";
 import { EditExamGenerationVariability } from "../components/edit-exam-generation-variability";
 import { EditExamConfig } from "../components/edit-exam-config";
 import { ConfigView } from "../components/config-view";
+import { ExamDiffProvider } from "../contexts/exam-diff";
+import { DiffField } from "../components/diff-field";
 
 function Edit() {
   const { id } = useParams({ from: "/exams/$id" });
@@ -254,7 +256,7 @@ function EditExam({ exam: examData }: EditExamProps) {
   }, {} as { [key: string]: { numberOfSet: number; numberOfQuestions: number } });
 
   return (
-    <>
+    <ExamDiffProvider examId={exam.id}>
       <EditExamActions
         {...{
           exam,
@@ -300,28 +302,33 @@ function EditExam({ exam: examData }: EditExamProps) {
             </Text>
 
             <Box mb={4}>
-              <Box overflowX="auto" borderRadius="md" bg="black" p={2}>
-                <Table variant="simple" size="sm" colorScheme="teal">
-                  <Thead>
-                    <Tr>
-                      <Th color="teal.300">Set Type</Th>
-                      <Th color="gray.200">Number of Set</Th>
-                      <Th color="gray.200">Number of Questions (total)</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {Object.entries(questionsBySet).map(([type, data]) => (
-                      <Tr key={type}>
-                        <Td color="gray.100" fontWeight="bold">
-                          {type}
-                        </Td>
-                        <Td color="gray.100">{data.numberOfSet}</Td>
-                        <Td color="gray.100">{data.numberOfQuestions}</Td>
+              <DiffField
+                currentValue={questionSets}
+                getDeployedValue={(exam) => exam.questionSets}
+              >
+                <Box overflowX="auto" borderRadius="md" bg="black" p={2}>
+                  <Table variant="simple" size="sm" colorScheme="teal">
+                    <Thead>
+                      <Tr>
+                        <Th color="teal.300">Set Type</Th>
+                        <Th color="gray.200">Number of Set</Th>
+                        <Th color="gray.200">Number of Questions (total)</Th>
                       </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
-              </Box>
+                    </Thead>
+                    <Tbody>
+                      {Object.entries(questionsBySet).map(([type, data]) => (
+                        <Tr key={type}>
+                          <Td color="gray.100" fontWeight="bold">
+                            {type}
+                          </Td>
+                          <Td color="gray.100">{data.numberOfSet}</Td>
+                          <Td color="gray.100">{data.numberOfQuestions}</Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </Box>
+              </DiffField>
             </Box>
             <EditExamGenerationVariability
               examId={exam.id}
@@ -368,7 +375,7 @@ function EditExam({ exam: examData }: EditExamProps) {
           </form>
         </Box>
       </Stack>
-    </>
+    </ExamDiffProvider>
   );
 }
 

@@ -22,6 +22,7 @@ import {
 } from "@prisma/client";
 import { UseQueryResult } from "@tanstack/react-query";
 import { ObjectId } from "bson";
+import { DiffField } from "./diff-field";
 
 interface EditExamConfigProps {
   exam: ExamCreatorExam;
@@ -56,61 +57,81 @@ export function EditExamConfig({
     <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} mb={4}>
       <FormControl>
         <FormLabel color="gray.300">Exam Name</FormLabel>
-        <Input
-          type="text"
-          placeholder="Exam Name..."
-          value={config.name}
-          onChange={(e) =>
-            setConfig({
-              name: e.target.value,
-            })
-          }
-          bg="gray.700"
-          color="gray.100"
-        />
+        <DiffField
+          currentValue={config.name}
+          getDeployedValue={(exam) => exam.config.name}
+        >
+          <Input
+            type="text"
+            placeholder="Exam Name..."
+            value={config.name}
+            onChange={(e) =>
+              setConfig({
+                name: e.target.value,
+              })
+            }
+            bg="gray.700"
+            color="gray.100"
+          />
+        </DiffField>
       </FormControl>
       <FormControl>
         <FormLabel color="gray.300">Accessibility Note</FormLabel>
-        <Input
-          type="text"
-          placeholder="Accessibility Note..."
-          value={config.note}
-          onChange={(e) =>
-            setConfig({
-              note: e.target.value,
-            })
-          }
-          bg="gray.700"
-          color="gray.100"
-        />
+        <DiffField
+          currentValue={config.note}
+          getDeployedValue={(exam) => exam.config.note}
+        >
+          <Input
+            type="text"
+            placeholder="Accessibility Note..."
+            value={config.note}
+            onChange={(e) =>
+              setConfig({
+                note: e.target.value,
+              })
+            }
+            bg="gray.700"
+            color="gray.100"
+          />
+        </DiffField>
       </FormControl>
       <FormControl>
         <FormLabel color="gray.300">Total Time [s]</FormLabel>
-        <NumberInput
-          value={config.totalTimeInS}
-          onChange={(_, value) =>
-            setConfig({
-              totalTimeInS: value,
-            })
-          }
-          min={0}
+        <DiffField
+          currentValue={config.totalTimeInS}
+          getDeployedValue={(exam) => exam.config.totalTimeInS}
         >
-          <NumberInputField bg="gray.700" color="gray.100" />
-        </NumberInput>
+          <NumberInput
+            value={config.totalTimeInS}
+            onChange={(_, value) =>
+              setConfig({
+                totalTimeInS: value,
+              })
+            }
+            min={0}
+          >
+            <NumberInputField bg="gray.700" color="gray.100" />
+          </NumberInput>
+        </DiffField>
       </FormControl>
       <FormControl>
         <FormLabel color="gray.300">Retake (Cooldown) Time [s]</FormLabel>
-        <NumberInput
-          value={config.retakeTimeInS}
-          onChange={(_, value) =>
-            setConfig({
-              retakeTimeInS: value,
-            })
-          }
-          min={0}
+        <DiffField
+          currentValue={config.retakeTimeInS}
+          getDeployedValue={(exam) => exam.config.retakeTimeInS}
         >
-          <NumberInputField bg="gray.700" color="gray.100" />
-        </NumberInput>
+          <NumberInput
+            value={config.retakeTimeInS}
+            onChange={(_, value) =>
+              setConfig({
+                retakeTimeInS: value,
+              })
+            }
+            min={0}
+          >
+            <NumberInputField bg="gray.700" color="gray.100" />
+          </NumberInput>
+        </DiffField>
       </FormControl>
 
       <FormControl>
@@ -283,19 +304,24 @@ export function EditExamConfig({
       </FormControl>
       <FormControl>
         <FormLabel color="gray.300">Deprecated</FormLabel>
-        <Checkbox
-          isChecked={exam.deprecated}
-          onChange={(e) =>
-            setExam({
-              deprecated: e.target.checked,
-            })
-          }
-          bg="gray.700"
-          color="gray.100"
-          colorScheme="red"
+        <DiffField
+          currentValue={exam.deprecated}
+          getDeployedValue={(exam) => exam.deprecated}
         >
-          Deprecated
-        </Checkbox>
+          <Checkbox
+            isChecked={exam.deprecated}
+            onChange={(e) =>
+              setExam({
+                deprecated: e.target.checked,
+              })
+            }
+            bg="gray.700"
+            color="gray.100"
+            colorScheme="red"
+          >
+            Deprecated
+          </Checkbox>
+        </DiffField>
       </FormControl>
     </SimpleGrid>
   );

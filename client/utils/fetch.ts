@@ -123,6 +123,34 @@ export async function getExamById(examId: string): Promise<ExamCreatorExam> {
   return deserialized;
 }
 
+interface GetExamEnvironmentExamArg {
+  examId: ExamCreatorExam["id"];
+  databaseEnvironment: "Staging" | "Production";
+}
+
+export async function getExamEnvironmentExam({
+  examId,
+  databaseEnvironment,
+}: GetExamEnvironmentExamArg): Promise<ExamCreatorExam | null> {
+  if (import.meta.env.VITE_MOCK_DATA === "true") {
+    await delayForTesting(300);
+    const res = await fetch(`/mocks/api/exams/${examId}.json`);
+
+    if (!res.ok) {
+      return null;
+    }
+
+    const exam: ExamCreatorExam = deserializeToPrisma(await res.json());
+    return exam;
+  }
+
+  const res = await authorizedFetch(
+    `/api/exams/${examId}/environment/${databaseEnvironment}`
+  );
+  const json = await res.json();
+  return json ? deserializeToPrisma(json) : null;
+}
+
 /**
  * Updates an existing exam by its ID
  * @param exam The full exam to overwrite the existing one.

@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added
+
+- client: inline diff mode for EditExam component with togglable comparison view
+- client: ExamDiffContext provider for managing diff state across components
+- client: DiffField component for wrapping form fields with visual diff indicators
+- server: new endpoint `GET /api/exams/{exam_id}/environment/{database_environment}` to fetch ExamEnvironmentExam from staging or production databases
+- client: environment selector (Staging/Production) in diff mode
+- client: yellow border highlights and deployed value display for modified fields
+- client: "New" badge for fields not yet deployed to selected environment
+
 ## [3.1.0] - 2025-10-24
 
 ### Chore
